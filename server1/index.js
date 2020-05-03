@@ -16,7 +16,24 @@ const AVAILABLE_API_KEYS = ['test_user'];
 /**
  *  App Configuration
  */
-app.use(cors());
+// CORS
+const whitelist = ['.app']
+const corsOptions = {
+    origin: function(origin, callback) {
+    let originIsWhitelisted = whitelist.some((domain) => {
+        if(origin) {
+            return origin.indexOf(domain) !== -1;
+        }
+        return false;
+        });
+      if(origin === 'http://localhost:3001') {
+        originIsWhitelisted = true;
+      }
+      console.log(origin);
+      callback(null, originIsWhitelisted);
+    }
+  };
+app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '2mb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 

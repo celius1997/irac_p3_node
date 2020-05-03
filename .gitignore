@@ -1,2 +1,10 @@
 node_modules
 package-lock.json
+
+server2/encrypted
+server2/output
+
+.high*
+.med*
+.low*
+.serp*

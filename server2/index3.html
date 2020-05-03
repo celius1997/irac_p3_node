@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Serpientes</title>
+      <meta charset="utf-8">
+      <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700" rel="stylesheet">
+      <link rel='stylesheet' type="text/css" href="./layout_base.css">
+
+   </head>
+   <body>
+   	<script src="http://cdn.dashjs.org/latest/dash.all.min.js"></script>
+   	<h2>PARTE 4 : Mejoras en el cliente web</h2>
+      <div class="main-container">
+         <div class="video-container">
+            <video class="dashjs-player" autoplay controls preload="auto" muted>
+            </video>
+         </div>
+         <div class="metrics">
+            <h3>MÉTRICAS</h3>
+            <p>Video Bitrate: <span id="bitrate"></span></p> 
+            <p>Video Buffer: <span id="buffer"></span></p> 
+            <p>Video Representation: <span id="representation"></span></p>
+         </div>
+      </div>
+
+      <div class="chart-container">
+         <canvas id="bitrateChart" width="400" height="100"></canvas>
+         <canvas id="bufferChart" width="400" height="100"></canvas>
+      </div>
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+   	<script>
+      const USER_ID = "test_user";
+      var bitrateElem = document.getElementById('bitrateChart').getContext('2d');
+      var bufferElem = document.getElementById('bufferChart').getContext('2d');
+
+      var bitrateChart = new Chart(bitrateElem, {
+         type: 'line',
+         data: {
+            labels: [0],
+            datasets: [{
+               label: 'Bitrate',
+               backgroundColor: 'transparent',
+               borderColor: 'rgb(255, 99, 132)',
+               data: [0]
+               }]
+            },
+          //options: options
+      });
+
+      var bufferChart = new Chart(bufferElem, {
+         type: 'line',
+         data: {
+            labels: [0],
+            datasets: [{
+               label: 'Buffer',
+               backgroundColor: 'transparent',
+               borderColor: 'rgb(99, 255, 132)',
+               data: [0]
+               }]
+            },
+          //options: options
+      });     
+
+      function addData(chart,label, data) {
+         chart.data.labels.push(label);
+         chart.data.datasets.forEach((dataset) => {
+             dataset.data.push(data);
+         });
+         chart.update();   
+      }
+
+      let key;
+      let keyId;
+      
+      
+		document.addEventListener("DOMContentLoaded", () => {
+         const endpoint = `http://localhost:8000/keyID/${USER_ID}`;
+         const options = {
+            method:'GET',
+            headers: {
+               'Accept': 'application/json',
+               'Content-type':'application/json'
+            }
+         };
+         fetch(endpoint, options)
+         .then((response) => {
+            if(response.ok) {
+               return response.json();
+            } else {
+               console.log('Respuesta de red OK pero respuesta HTTP no OK'); 
+            }
+         }).then((keys) => {
+            init(keys);
+         })
+         .catch((err) => {
+            console.log(err);
+         });
+         
+      });
+      
+      
+      function init(keys){ 
+         var video,
+            player,
+            mpd_url = "./encrypted/stream.mpd";
+
+         video = document.querySelector("video");
+         player = dashjs.MediaPlayer().create();
+         
+         console.log(keys.key)
+         // Enable decryption
+         const protData = {"org.w3.clearkey": {"clearkeys": {"oW5AK5BW43HzbTSKpiu3SQ": keys.key }}};
+         player.setProtectionData(protData);
+
+         player.initialize(video, mpd_url, true); 
+         player.on(dashjs.MediaPlayer.events["PLAYBACK_ENDED"], function() {
+            clearInterval(eventPoller); 
+         });
+
+         var eventPoller = setInterval(function() {
+            var streamInfo = player.getActiveStream().getStreamInfo(); 
+            var dashMetrics = player.getDashMetrics();
+            var dashAdapter = player.getDashAdapter();
+   
+            if (dashMetrics && streamInfo) {
+               const periodIdx = streamInfo.index;
+               var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true); 
+               var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+               var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to,periodIdx) / 1000) : 0;
+               addData(bitrateChart, '', bitrate);
+               addData(bufferChart, '', bufferLevel);
+               document.getElementById('buffer').innerText = bufferLevel + " secs"; 
+               document.getElementById('bitrate').innerText = bitrate + " Kbps"; 
+               document.getElementById('representation').innerText = repSwitch.to;
+            }
+         }, 500);
+      }  
+
+  
+</script>
+
+   </body>
+</html>		

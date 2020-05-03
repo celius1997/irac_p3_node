@@ -1,0 +1,15 @@
+# docker-compose.yml
+version: "3.2"
+services:
+    app:
+        build: ./server1 #use local version
+        hostname: app
+        ports:
+        - 8000:8000
+    client:
+        build: ./server2 #use local version
+        hostname: client
+        ports:
+        - 3001:3001
+        depends_on:
+        - app
