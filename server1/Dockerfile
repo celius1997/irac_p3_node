@@ -3,9 +3,9 @@ FROM node:12.4.0
 WORKDIR /home/server1
 
 COPY package.json /home/server1/
-COPY package-lock.json /home/server1/
+#COPY package-lock.json /home/server1/
 
-RUN npm ci
+#RUN npm ci
 
 COPY . /home/server1
 RUN npm install -q
