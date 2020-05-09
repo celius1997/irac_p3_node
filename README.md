@@ -11,7 +11,9 @@ Seguidamente, cuando el cliente solicita la reproducción del contenido, el serv
 si el usuario está autorizado para reproducir el contenido y, de ser así, responde con la clave necesaria para desencriptar dicho contenido.  
 
 ## Arquitectura
-La siguiente figura muestra la arquitectura implementada mediante contenedores docker: 
+La siguiente figura muestra la arquitectura implementada mediante contenedores Docker:
+
+<img width="787" alt="arq" src="https://user-images.githubusercontent.com/25430555/81472394-1b0d6100-91f8-11ea-9ae0-cb43e5d7d894.png">
 
 
 * **Server1 (app)**: este contenedor ejecuta un servidor de Express.Js, y esta escuchando en el puerto 8000. Es el encargadod e responder a las peticiones REST del cliente. 
