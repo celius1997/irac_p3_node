@@ -1,4 +1,4 @@
-# Gestión dinámica mediante API REST de claeves DRM
+# Gestión dinámica mediante API REST de claves DRM
 
 Se ha partido de la filosofía del streaming de contenido audiovisual, que determina que, en primer lugar ,el video es codificado a diferentes calidades, encriptado, paquetizado  (siguiendo múltiples esquemas DRM a ser posible), y almacenado.
 
